@@ -1,0 +1,135 @@
+  {% extends "base.html" %}
+
+  {% block content %}
+  
+    <div class="container">    
+      <div class="row">
+          <div class="container-fluid">
+              <div class="row">
+                <div class="col-sm-3 col-md-2 sidebar" style="padding-top: 70px;">  
+                  <!-- Search form -->
+                  <p style="font-weight:bold">Search Products</p>
+                  <input class="form-control" type="text" name="categoria" placeholder="Search products..." aria-label="Search">   
+                  <input class="btn btn-primary" type="submit" value="Search">             
+                  <ul class="nav nav-sidebar">                    
+                        {% for category in categories %}
+                    <li class="radio">
+                        <label class="radio-inline">
+                          <input type="radio" name="categoria" value="{{ category.pk }}"/>
+                          <label>{{ category.title}}</label>
+                        </label>
+                    </li>
+                        {% endfor %}
+                  </ul>
+                </div>
+                <div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
+                    {% for item in items %}
+                    <div class="col-md-4">
+                      <div class="thumbnail">
+                        <img src="{{ item.image.url }} " alt="" class="img-responsive" style="max-height: 350px">
+                        <span class="post-title">
+                          <b>{{ item.category }}</b><br>
+                        </span>
+                        <div class="caption">
+                          <h4 class="pull-right"></h4>
+                          <div class="price col-md-4">
+                          <h5 class="display-5">  </h5>
+                            {% if item.discount_price %}
+                            <span class="mr-1">
+                              <del style="color: red; font-weight: bold;">${{ item.price }}</del>
+                            </span>
+                            <span style="color: green; font-weight: bold;">${{ item.discount_price }}</span>
+                            {% else %}
+                            <span >${{ item.price }}</span>
+                            {% endif %}
+                        </div>
+                          <h4 class="lead font-weight-bold"><a>{{ item.title }}</a></h4>
+                          <p></p>
+                        </div>
+                        <div class="ratings">
+                          <p>
+                            <span class="glyphicon glyphicon-star"></span>
+                            <span class="glyphicon glyphicon-star"></span>
+                            <span class="glyphicon glyphicon-star"></span>
+                            <span class="glyphicon glyphicon-star"></span>
+                            <span class="glyphicon glyphicon-star"></span>
+                              (215 reviews)
+                          </p>
+                        </div>
+                        <div class="space-ten"></div>
+                        <div class="btn-ground text-center">
+                            {% comment %} <form class="d-flex justify-content-left">
+                                <!-- Default input -->
+                                <input type="number" value="1" aria-label="Search" class="form-control" style="width: 100px">
+                                <button class="btn btn-primary btn-md my-0 p" type="submit">
+                                  Add to cart
+                                  <i class="fas fa-shopping-cart ml-1"></i>
+                                </button>
+                
+                              </form> {% endcomment %}
+                              <a href="{{ item.get_add_to_cart_url }}" class="btn btn-primary"><span class="glyphicon glyphicon-shopping-cart"></span>  
+                                Add To Cart
+                              </a> 
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#product_view"><i class="fa fa-search"></i> Quick View</button>
+                        </div>
+                        <div class="space-ten"></div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+        
+  <div class="modal fade product_view" id="product_view">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <a href="{{ item }}" data-dismiss="modal" class="class pull-right"><span class="glyphicon glyphicon-remove"></span></a>
+                  <h3 class="modal-title">{{ item.title }}</h3>
+              </div>
+              <div class="modal-body">
+                  <div class="row">
+                      <div class="col-md-6 product_img">
+                          <img src="{{ item.image.url }}" class="img-responsive">
+                      </div>
+                      <div class="col-md-6 product_content">
+                          
+                          <div class="rating">
+                              <span class="glyphicon glyphicon-star"></span>
+                              <span class="glyphicon glyphicon-star"></span>
+                              <span class="glyphicon glyphicon-star"></span>
+                              <span class="glyphicon glyphicon-star"></span>
+                              <span class="glyphicon glyphicon-star"></span>
+                              (146 reviews)
+                          </div>
+                          <p>{{ item.description }}</p>
+                          <h3 class="cost"><span class="glyphicon glyphicon-usd"></span> {{ item.price}} <small class="pre-cost"><span class="glyphicon glyphicon-usd"></span> 60.00</small></h3>
+                        
+                          <div class="space-ten"></div>
+                          <div class="btn-ground">
+                              {% comment %} <form class="d-flex justify-content-left">
+                                  <!-- Default input -->
+                                  <input type="number" value="1" aria-label="Search" class="form-control" style="width: 100px">
+                                  <button class="btn btn-primary btn-md my-0 p" type="submit">
+                                    Add to cart
+                                    <i class="fas fa-shopping-cart ml-1"></i>
+                                  </button>
+                  
+                                </form> {% endcomment %}
+                                <a href="{{ item.get_add_to_cart_url }}" class="btn btn-primary"><span class="glyphicon glyphicon-shopping-cart"></span>  
+                                  Add To Cart
+                                </a>
+                                <a href="{{ item.get_remove_from_cart_url }}" class="btn btn-primary"><span class="glyphicon glyphicon-shopping-cart"></span>
+                                  Remove from cart
+                                </a>               
+                              
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  {% endblock content %}
