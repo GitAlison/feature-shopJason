@@ -23,5 +23,6 @@ sqlparse==0.2.4
 static3==0.7.0
 stripe==2.27.0
 urllib3==1.24.2
+djangorestframework==3.10.3
 gunicorn
 psycopg2

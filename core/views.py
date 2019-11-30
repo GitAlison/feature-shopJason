@@ -11,7 +11,13 @@ from .forms import CheckoutForm, CouponForm, RefundForm, PaymentForm
 from .models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Category
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.core.paginator import Paginator 
+from django.core.paginator import Paginator
+from rest_framework.generics import ListAPIView
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
+from .serializers import ItemSerializer
+from .paginations import ProductsPagination
+from .filters import ItemFilter
 
 import random
 import string
@@ -542,3 +548,15 @@ def contactus(request):
 def aboutus(request):
     response = render(request, 'aboutus.html')
     return response
+
+
+class ItemList(ListAPIView):
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ItemFilter
+    pagination_class = ProductsPagination
+
+
+
+

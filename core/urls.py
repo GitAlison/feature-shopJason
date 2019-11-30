@@ -14,7 +14,8 @@ from .views import (
     faq,
     contactus,
     aboutus,
-    products
+    products,
+    ItemList
     )
 
 app_name = 'core'
@@ -35,4 +36,9 @@ urlpatterns = [
     path('faq/', faq, name='faq'),
     path('contactus', contactus, name='contactus'),
     path('aboutus', aboutus, name='aboutus'),
+
+
+    # Api
+    path('products-api', ItemList.as_view(), name='products'),
+
 ]
