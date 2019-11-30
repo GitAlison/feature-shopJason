@@ -1,135 +1,445 @@
-  {% extends "base.html" %}
+{% extends "base.html" %}
+{% block extra_scripts %}
+<style>
+  .glyphicon {
+    margin-right: 5px;
+  }
 
-  {% block content %}
-  
-    <div class="container">    
+  .thumbnail {
+    margin-bottom: 20px;
+    padding: 0px;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+  }
+
+  .list-item {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .list-item img {
+    max-width: 250px;
+  }
+
+  .list-group {
+    flex-direction: row;
+  }
+
+  .hide_desciption {
+    display: none;
+  }
+
+  .item.list-group-item {
+    float: none !important;
+    width: 100% !important;
+    background-color: #fff !important;
+    margin-bottom: 10px !important;
+  }
+
+  .item.list-group-item:nth-of-type(odd):hover,
+  .item.list-group-item:hover {
+    background: #428bca !important;
+  }
+
+  .item.list-group-item .list-group-image {
+    margin-right: 10px !important;
+  }
+
+  .item.list-group-item .thumbnail {
+    margin-bottom: 0px !important;
+  }
+
+  .item.list-group-item .caption {
+    padding: 9px 9px 0px 9px;
+  }
+
+  .item.list-group-item:nth-of-type(odd) {
+    background: #eeeeee;
+  }
+
+  .item.list-group-item:before,
+  .item.list-group-item:after {
+    display: table !important;
+    content: " " !important;
+  }
+
+  .item.list-group-item img {
+    float: left !important;
+  }
+
+  .item.list-group-item:after {
+    clear: both !important;
+  }
+
+  .list-group-item-text {
+    margin: 0 0 11px !important;
+  }
+</style>
+
+
+<script>
+  $(document).ready(function () {
+    $('#list').click(function (event) {
+      event.preventDefault();
+      $('#products #coluna').removeClass('col-sm-6 col-md-4 col-xs-12 col-lg-4 item');
+      $('#product #description').removeClass('hide_desciption');
+      $('.thumbnail').addClass('list-item');
+
+    });
+    $('#grid').click(function (event) {
+      event.preventDefault();
+
+      $('#products #coluna').addClass('col-sm-6 col-md-4 col-xs-12 col-lg-4 item');
+      $('#product #description').addClass('hide_desciption');
+      $('.thumbnail').removeClass('list-item');
+
+    });
+  });
+
+
+
+
+
+
+
+
+
+  var app = new Vue({
+    el: '#app',
+    delimiters: ['{', '}'],
+    data: {
+      loading: true,
+      search: '',
+      currentPage: 1,
+      categoria: undefined,
+      empty: false,
+      items: [],
+
+
+    },
+    mounted() {
+
+      if (!localStorage.getItem('page')) {
+        localStorage.setItem('page', 1);
+      } else (
+        this.currentPage = parseInt(localStorage.getItem('page'))
+      )
+
+      console.log('Iniciado')
+      this.loadItems();
+    },
+    methods: {
+      setPage: function (val) {
+        localStorage.setItem('page', val)
+      },
+      firstPage: function () {
+        this.loading = true;
+
+        axios.get('/products-api?page=1')
+          .then(response => {
+            this.currentPage = 1;
+            this.setPage(1)
+            this.items = response.data
+            this.loading = false;
+          });
+
+        loading = false
+      },
+      lastPage: function () {
+        this.loading = true;
+        console.log('last');
+        console.log(this.items)
+        axios.get('/products-api?page=' + this.items.total_pages)
+          .then(response => {
+            this.currentPage = this.items.total_pages;
+            this.items = response.data
+            this.setPage(this.items.total_pages)
+            this.loading = false;
+          });
+
+        loading = false
+      },
+
+      prevPage: function () {
+        this.loading = true;
+        if (this.items.previous) {
+          axios.get('/products-api?page=' + (this.currentPage - 1))
+            .then(response => {
+              this.items = response.data
+              this.loading = false;
+              this.setPage(this.currentPage--)
+            });
+        }
+        loading = false
+      },
+      nextPage: function () {
+        this.loading = true;
+        if (this.items.next) {
+          axios.get('/products-api?page=' + (this.currentPage + 1))
+            .then(response => {
+              this.items = response.data
+              this.loading = false;
+              this.setPage(this.currentPage++)
+            });
+        }
+        loading = false
+      },
+
+      // Cart
+      addCart: function (item) {
+        window.location = '/add-to-cart/' + item + '/';
+
+      },
+      removeFromCart: function (item) {
+        window.location = '/remove-from-cart/' + item + '/';
+
+      },
+
+      loadItems: function () {
+        this.loading = true;
+        axios.get('/products-api?page=' + localStorage.getItem('page'))
+          .then(response => {
+            this.items = response.data
+            this.loading = false;
+          });
+
+      },
+      selectCategoria: function () {
+        this.loading = true;
+        axios.get('/products-api?category=' + this.categoria)
+          .then(response => {
+            this.items = response.data
+            if (response.data.results == '') {
+              this.empty = true;
+              this.loading = false;
+            } else {
+              this.empty = false;
+            }
+            this.loading = false;
+          });
+      },
+      searchItem: function () {
+
+        if (this.search) {
+          this.loading = true;
+          axios.get('/products-api?title=' + this.search)
+            .then(response => {
+              this.items = response.data
+              if (response.data.results == '') {
+                this.empty = true;
+              } else {
+                this.empty = false;
+              }
+              this.loading = false;
+            });
+        } else {
+          alert('Digite Algo No campo de Pesquisa')
+        }
+
+
+      }
+    }
+
+  })
+
+
+</script>
+
+{% endblock extra_scripts %}
+{% block content %}
+
+<div class="container" id="app">
+  <div class="row">
+    <div class="container-fluid">
       <div class="row">
-          <div class="container-fluid">
-              <div class="row">
-                <div class="col-sm-3 col-md-2 sidebar" style="padding-top: 70px;">  
-                  <!-- Search form -->
-                  <p style="font-weight:bold">Search Products</p>
-                  <input class="form-control" type="text" name="categoria" placeholder="Search products..." aria-label="Search">   
-                  <input class="btn btn-primary" type="submit" value="Search">             
-                  <ul class="nav nav-sidebar">                    
-                        {% for category in categories %}
-                    <li class="radio">
-                        <label class="radio-inline">
-                          <input type="radio" name="categoria" value="{{ category.pk }}"/>
-                          <label>{{ category.title}}</label>
-                        </label>
-                    </li>
-                        {% endfor %}
-                  </ul>
-                </div>
-                <div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
-                    {% for item in items %}
-                    <div class="col-md-4">
-                      <div class="thumbnail">
-                        <img src="{{ item.image.url }} " alt="" class="img-responsive" style="max-height: 350px">
-                        <span class="post-title">
-                          <b>{{ item.category }}</b><br>
-                        </span>
-                        <div class="caption">
-                          <h4 class="pull-right"></h4>
-                          <div class="price col-md-4">
-                          <h5 class="display-5">  </h5>
-                            {% if item.discount_price %}
-                            <span class="mr-1">
-                              <del style="color: red; font-weight: bold;">${{ item.price }}</del>
-                            </span>
-                            <span style="color: green; font-weight: bold;">${{ item.discount_price }}</span>
-                            {% else %}
-                            <span >${{ item.price }}</span>
-                            {% endif %}
-                        </div>
-                          <h4 class="lead font-weight-bold"><a>{{ item.title }}</a></h4>
-                          <p></p>
-                        </div>
-                        <div class="ratings">
-                          <p>
-                            <span class="glyphicon glyphicon-star"></span>
-                            <span class="glyphicon glyphicon-star"></span>
-                            <span class="glyphicon glyphicon-star"></span>
-                            <span class="glyphicon glyphicon-star"></span>
-                            <span class="glyphicon glyphicon-star"></span>
-                              (215 reviews)
-                          </p>
-                        </div>
-                        <div class="space-ten"></div>
-                        <div class="btn-ground text-center">
-                            {% comment %} <form class="d-flex justify-content-left">
-                                <!-- Default input -->
-                                <input type="number" value="1" aria-label="Search" class="form-control" style="width: 100px">
-                                <button class="btn btn-primary btn-md my-0 p" type="submit">
-                                  Add to cart
-                                  <i class="fas fa-shopping-cart ml-1"></i>
-                                </button>
-                
-                              </form> {% endcomment %}
-                              <a href="{{ item.get_add_to_cart_url }}" class="btn btn-primary"><span class="glyphicon glyphicon-shopping-cart"></span>  
-                                Add To Cart
-                              </a> 
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#product_view"><i class="fa fa-search"></i> Quick View</button>
-                        </div>
-                        <div class="space-ten"></div>
-                      </div>
+        <div class="col-sm-3 col-md-2 sidebar" style="padding-top: 70px;">
+          <!-- Search form -->
+          <p style="font-weight:bold">Search Products</p>
+          <input class="form-control" v-model="search" @keyup.enter="searchItem" type="text" name="categoria"
+            placeholder="Search products..." aria-label="Search">
+          <input class="btn btn-primary" @click="searchItem" type="submit" value="Search">
+          <ul class="nav nav-sidebar">
+
+            {% for category in categories %}
+            <li class="radio w-100">
+              <label class="radio-inline">
+                <input v-model="categoria" @change="selectCategoria" type="radio" name="categoria"
+                  value="{{ category.pk }}" />
+                {{ category.title}}
+              </label>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
+
+
+          <nav v-if="!loading">
+            <ul class="pagination">
+              <li v-if="items.previous" class="page-item" @click="firstPage">
+                <a class="page-link">First</a>
+              </li>
+              <li class="page-item" v-bind:class="{'disabled':!items.previous}">
+                <a class="page-link" tabindex="-1" @click="prevPage">Previous</a>
+              </li>
+              <li class="page-item active"><a class="page-link">{currentPage}</a></li>
+
+
+              <li class="page-item" v-bind:class="{'disabled':!items.next}">
+                <a class="page-link" @click="nextPage">Next</a>
+              </li>
+
+              <li v-if="items.next" class="page-item" @click="lastPage">
+                <a class="page-link">Last Page</a>
+              </li>
+            </ul>
+          </nav>
+
+
+          <div class="well well-sm">
+            <strong>Display</strong>
+            <div class="btn-group">
+              <a href="#" id="list" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-th-list">
+                </span>List</a> <a href="#" id="grid" class="btn btn-default btn-sm"><span
+                  class="glyphicon glyphicon-th"></span>Grid</a>
+            </div>
+          </div>
+          <img v-if="loading" style="margin: 10px auto ; display: flex;" src="/static/img/loading.gif" alt="Loading">
+          <h2 v-if="empty">Items Not Found </h2>
+          <div id="products" class="row list-group">
+
+            <div id="coluna" class="col-sm-6 col-md-4 col-xs-12 col-lg-4" v-for="item in items.results">
+              <div id="product" class="thumbnail">
+
+                <img class="group list-group-image" :src="item.image" />
+
+
+                <div class="caption">
+                  <h4 class="group inner list-group-item-heading">
+                    {item.title} <br>
+                    <p class="label label-default">{item.category_name}</p>
+                  </h4>
+                  <p class="group inner list-group-item-text">
+                    <div class="ratings">
+                      <p>
+                        <span class="glyphicon glyphicon-star"></span>
+                        <span class="glyphicon glyphicon-star"></span>
+                        <span class="glyphicon glyphicon-star"></span>
+                        <span class="glyphicon glyphicon-star"></span>
+                        <span class="glyphicon glyphicon-star"></span> <br>
+                        (215 reviews)
+                      </p>
                     </div>
-                    {% endfor %}
+                  </p>
+
+                  <p id="description" class="hide_desciption">{item.description}</p>
+
+                  <div class="price_buttons">
+                    <div class="prices">
+                      <div v-if="item.discount_price">
+                        <span class="mr-1">
+                          <del style="color: red; font-weight: bold;">${ item.price }</del>
+                        </span>
+                        <span style="color: green; font-weight: bold;">${item.discount_price }</span>
+                      </div>
+                      <span class="lead" v-else>${ item.price }</span>
+
+
+                    </div>
+                    <div class="buttons">
+                      <a @click="addCart(item.slug)" class="btn btn-primary w-100"><span
+                          class="glyphicon glyphicon-shopping-cart"></span>
+                        Add To Cart
+                      </a>
+                      <button type="button" class="btn btn-primary w-100" data-toggle="modal"
+                        :data-target="'#product_view'+item.id"><i class="fa fa-search"></i> Quick View</button>
+                    </div>
                   </div>
                 </div>
-                </div>
               </div>
-            </div>
-        
-  <div class="modal fade product_view" id="product_view">
-      <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <a href="{{ item }}" data-dismiss="modal" class="class pull-right"><span class="glyphicon glyphicon-remove"></span></a>
-                  <h3 class="modal-title">{{ item.title }}</h3>
-              </div>
-              <div class="modal-body">
-                  <div class="row">
-                      <div class="col-md-6 product_img">
-                          <img src="{{ item.image.url }}" class="img-responsive">
-                      </div>
-                      <div class="col-md-6 product_content">
-                          
+
+
+
+              <div class="modal fade product_view" :id="'product_view'+item.id">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <a href="" data-dismiss="modal" class="class pull-right"><span
+                          class="glyphicon glyphicon-remove"></span></a>
+                      <h3 class="modal-title">{ item.title }</h3>
+                    </div>
+                    <div class="modal-body">
+                      <div class="row">
+                        <div class="col-md-6 product_img">
+                          <img :src="item.image" class="img-responsive">
+                        </div>
+                        <div class="col-md-6 product_content">
+
                           <div class="rating">
-                              <span class="glyphicon glyphicon-star"></span>
-                              <span class="glyphicon glyphicon-star"></span>
-                              <span class="glyphicon glyphicon-star"></span>
-                              <span class="glyphicon glyphicon-star"></span>
-                              <span class="glyphicon glyphicon-star"></span>
-                              (146 reviews)
+                            <span class="glyphicon glyphicon-star"></span>
+                            <span class="glyphicon glyphicon-star"></span>
+                            <span class="glyphicon glyphicon-star"></span>
+                            <span class="glyphicon glyphicon-star"></span>
+                            <span class="glyphicon glyphicon-star"></span>
+                            (146 reviews)
                           </div>
-                          <p>{{ item.description }}</p>
-                          <h3 class="cost"><span class="glyphicon glyphicon-usd"></span> {{ item.price}} <small class="pre-cost"><span class="glyphicon glyphicon-usd"></span> 60.00</small></h3>
-                        
+                          <p>{ item.description }</p>
+
+                          <h3 class="cost"><span class="glyphicon glyphicon-usd"></span> {item.price} <small
+                              class="pre-cost"><span class="glyphicon glyphicon-usd"></span>
+                              {item.discount_price}</small>
+                          </h3>
+
                           <div class="space-ten"></div>
                           <div class="btn-ground">
-                              {% comment %} <form class="d-flex justify-content-left">
-                                  <!-- Default input -->
-                                  <input type="number" value="1" aria-label="Search" class="form-control" style="width: 100px">
-                                  <button class="btn btn-primary btn-md my-0 p" type="submit">
-                                    Add to cart
-                                    <i class="fas fa-shopping-cart ml-1"></i>
-                                  </button>
-                  
-                                </form> {% endcomment %}
-                                <a href="{{ item.get_add_to_cart_url }}" class="btn btn-primary"><span class="glyphicon glyphicon-shopping-cart"></span>  
-                                  Add To Cart
-                                </a>
-                                <a href="{{ item.get_remove_from_cart_url }}" class="btn btn-primary"><span class="glyphicon glyphicon-shopping-cart"></span>
-                                  Remove from cart
-                                </a>               
-                              
+
+                            <a @click="addCart(item.slug)" class="btn btn-primary w-100"><span
+                                class="glyphicon glyphicon-shopping-cart"></span>
+                              Add To Cart
+                            </a>
+                            <a @click="removeFromCart(item.slug)" class="btn btn-primary w-100"><span
+                                class="glyphicon glyphicon-shopping-cart"></span>
+                              Remove from cart
+                            </a>
+
                           </div>
+                        </div>
                       </div>
+                    </div>
                   </div>
+                </div>
               </div>
+
+            </div>
+
+
           </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
       </div>
+    </div>
   </div>
-  {% endblock content %}
+</div>
+
+
+{% endblock content %}
