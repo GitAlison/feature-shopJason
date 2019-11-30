@@ -120,6 +120,15 @@
     },
     mounted() {
 
+
+      category = new URL(location.href).searchParams.get('category');
+
+      if (category) {
+        this.categoria = category;
+        localStorage.setItem('page', 1);
+      }
+
+
       if (!localStorage.getItem('page')) {
         localStorage.setItem('page', 1);
       } else (
@@ -176,7 +185,7 @@
       nextPage: function () {
         this.loading = true;
         if (this.items.next) {
-          axios.get('/products-api?page=' + (this.currentPage + 1))
+          axios.get('/products-api?page=' + (this.currentPage + 1) + '&category__title=' + this.categoria)
             .then(response => {
               this.items = response.data
               this.loading = false;
@@ -197,17 +206,41 @@
       },
 
       loadItems: function () {
-        this.loading = true;
-        axios.get('/products-api?page=' + localStorage.getItem('page'))
-          .then(response => {
-            this.items = response.data
-            this.loading = false;
-          });
+
+        category = new URL(location.href).searchParams.get('category');
+
+        if (category) {
+          console.log('Categoria', category)
+          this.loading = true;
+          axios.get('/products-api?category__title=' + category)
+            .then(response => {
+              this.items = response.data
+              this.loading = false;
+            });
+
+        } else {
+          this.loading = true;
+          axios.get('/products-api?page=' + localStorage.getItem('page'))
+            .then(response => {
+              this.items = response.data
+              this.loading = false;
+            });
+        }
+
 
       },
-      selectCategoria: function () {
+      selectCategoria: function (event) {
+
+        if (event.target.value) {
+          this.categoria = event.target.value;
+        } else {
+          this.categoria = new URL(location.href).searchParams.get('category');
+          localStorage.setItem('page', 1);
+        }
+
+
         this.loading = true;
-        axios.get('/products-api?category=' + this.categoria)
+        axios.get('/products-api?category__title=' + this.categoria)
           .then(response => {
             this.items = response.data
             if (response.data.results == '') {
@@ -265,7 +298,7 @@
             <li class="radio w-100">
               <label class="radio-inline">
                 <input v-model="categoria" @change="selectCategoria" type="radio" name="categoria"
-                  value="{{ category.pk }}" />
+                  value="{{ category.title|lower }}" />
                 {{ category.title}}
               </label>
             </li>
@@ -410,31 +443,8 @@
                   </div>
                 </div>
               </div>
-
             </div>
-
-
           </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </div>
       </div>
     </div>
