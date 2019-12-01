@@ -112,7 +112,7 @@
       loading: true,
       search: '',
       currentPage: 1,
-      categoria: undefined,
+      categoria: '',
       empty: false,
       items: [],
 
@@ -282,31 +282,147 @@
 {% endblock extra_scripts %}
 {% block content %}
 
-<div class="container" id="app">
+<div class="container-fluid" id="app">
+
+
   <div class="row">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar" style="padding-top: 70px;">
-          <!-- Search form -->
-          <p style="font-weight:bold">Search Products</p>
-          <input class="form-control" v-model="search" @keyup.enter="searchItem" type="text" name="categoria"
-            placeholder="Search products..." aria-label="Search">
-          <input class="btn btn-primary" @click="searchItem" type="submit" value="Search">
-          <ul class="nav nav-sidebar">
+    <div class="col-sm-3 col-md-2 ">
+      <!-- Search form -->
+      <p style="font-weight:bold">Search Products</p>
+      <input class="form-control" v-model="search" @keyup.enter="searchItem" type="text" name="categoria"
+        placeholder="Search products..." aria-label="Search">
+      <input class="btn btn-primary" @click="searchItem" type="submit" value="Search">
+      <ul class="nav nav-sidebar">
 
-            {% for category in categories %}
-            <li class="radio w-100">
-              <label class="radio-inline">
-                <input v-model="categoria" @change="selectCategoria" type="radio" name="categoria"
-                  value="{{ category.title|lower }}" />
-                {{ category.title}}
-              </label>
-            </li>
-            {% endfor %}
-          </ul>
+        {% for category in categories %}
+        <li class="radio w-100">
+          <label class="radio-inline">
+            <input v-model="categoria" @change="selectCategoria" type="radio" name="categoria"
+              value="{{ category.title|lower }}" />
+            {{ category.title}}
+          </label>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-sm-9 col-md-10 col-md-10  main">
+
+      <div class="well well-sm">
+        <strong>Display</strong>
+        <div class="btn-group">
+          <a href="#" id="list" class="btn btn-primary "><span class="glyphicon glyphicon-th-list">
+            </span>List</a> <a href="#" id="grid" class="btn btn-primary"><span
+              class="glyphicon glyphicon-th"></span>Grid</a>
         </div>
-        <div class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 main">
+      </div>
+      <img v-if="loading" style="margin: 10px auto ; display: flex;" src="/static/img/loading.gif" alt="Loading">
+      <h2 v-if="empty">Items Not Found </h2>
+      <div id="products" class="row list-group">
 
+        <div id="coluna" class="col-sm-6 col-md-4 col-xs-12 col-lg-4" v-for="item in items.results">
+          <div id="product" class="thumbnail">
+
+            <img class="group list-group-image" :src="item.image" />
+
+
+            <div class="caption">
+              <h4 class="group inner list-group-item-heading">
+                {item.title} <br>
+                <p class="label label-default">{item.category_name}</p>
+              </h4>
+              <p class="group inner list-group-item-text">
+                <div class="ratings">
+                  <p>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span>
+                    <span class="glyphicon glyphicon-star"></span> <br>
+                    (215 reviews)
+                  </p>
+                </div>
+              </p>
+
+              <p id="description" class="hide_desciption">{item.description}</p>
+
+              <div class="price_buttons">
+                <div class="prices">
+                  <div v-if="item.discount_price">
+                    <span class="mr-1">
+                      <del style="color: red; font-weight: bold;">${ item.price }</del>
+                    </span>
+                    <span style="color: green; font-weight: bold;">${item.discount_price }</span>
+                  </div>
+                  <span class="lead" v-else>${ item.price }</span>
+
+
+                </div>
+                <div class="buttons">
+                  <a @click="addCart(item.slug)" class="btn btn-primary w-100"><span
+                      class="glyphicon glyphicon-shopping-cart"></span>
+                    Add To Cart
+                  </a>
+                  <button type="button" class="btn btn-primary w-100" data-toggle="modal"
+                    :data-target="'#product_view'+item.id"><i class="fa fa-search"></i> Quick View</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+          <div class="modal fade product_view" :id="'product_view'+item.id">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <a href="" data-dismiss="modal" class="class pull-right"><span
+                      class="glyphicon glyphicon-remove"></span></a>
+                  <h3 class="modal-title">{ item.title }</h3>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-md-6 product_img">
+                      <img :src="item.image" class="img-responsive">
+                    </div>
+                    <div class="col-md-6 product_content">
+
+                      <div class="rating">
+                        <span class="glyphicon glyphicon-star"></span>
+                        <span class="glyphicon glyphicon-star"></span>
+                        <span class="glyphicon glyphicon-star"></span>
+                        <span class="glyphicon glyphicon-star"></span>
+                        <span class="glyphicon glyphicon-star"></span>
+                        (146 reviews)
+                      </div>
+                      <p>{ item.description }</p>
+
+                      <h3 class="cost"><span class="glyphicon glyphicon-usd"></span> {item.price} <small
+                          class="pre-cost"><span class="glyphicon glyphicon-usd"></span>
+                          {item.discount_price}</small>
+                      </h3>
+
+                      <div class="space-ten"></div>
+                      <div class="btn-ground">
+
+                        <a @click="addCart(item.slug)" class="btn btn-primary w-100"><span
+                            class="glyphicon glyphicon-shopping-cart"></span>
+                          Add To Cart
+                        </a>
+                        <a @click="removeFromCart(item.slug)" class="btn btn-primary w-100"><span
+                            class="glyphicon glyphicon-shopping-cart"></span>
+                          Remove from cart
+                        </a>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin: 0 auto;">
 
           <nav v-if="!loading">
             <ul class="pagination">
@@ -328,127 +444,15 @@
               </li>
             </ul>
           </nav>
-
-
-          <div class="well well-sm">
-            <strong>Display</strong>
-            <div class="btn-group">
-              <a href="#" id="list" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-th-list">
-                </span>List</a> <a href="#" id="grid" class="btn btn-default btn-sm"><span
-                  class="glyphicon glyphicon-th"></span>Grid</a>
-            </div>
-          </div>
-          <img v-if="loading" style="margin: 10px auto ; display: flex;" src="/static/img/loading.gif" alt="Loading">
-          <h2 v-if="empty">Items Not Found </h2>
-          <div id="products" class="row list-group">
-
-            <div id="coluna" class="col-sm-6 col-md-4 col-xs-12 col-lg-4" v-for="item in items.results">
-              <div id="product" class="thumbnail">
-
-                <img class="group list-group-image" :src="item.image" />
-
-
-                <div class="caption">
-                  <h4 class="group inner list-group-item-heading">
-                    {item.title} <br>
-                    <p class="label label-default">{item.category_name}</p>
-                  </h4>
-                  <p class="group inner list-group-item-text">
-                    <div class="ratings">
-                      <p>
-                        <span class="glyphicon glyphicon-star"></span>
-                        <span class="glyphicon glyphicon-star"></span>
-                        <span class="glyphicon glyphicon-star"></span>
-                        <span class="glyphicon glyphicon-star"></span>
-                        <span class="glyphicon glyphicon-star"></span> <br>
-                        (215 reviews)
-                      </p>
-                    </div>
-                  </p>
-
-                  <p id="description" class="hide_desciption">{item.description}</p>
-
-                  <div class="price_buttons">
-                    <div class="prices">
-                      <div v-if="item.discount_price">
-                        <span class="mr-1">
-                          <del style="color: red; font-weight: bold;">${ item.price }</del>
-                        </span>
-                        <span style="color: green; font-weight: bold;">${item.discount_price }</span>
-                      </div>
-                      <span class="lead" v-else>${ item.price }</span>
-
-
-                    </div>
-                    <div class="buttons">
-                      <a @click="addCart(item.slug)" class="btn btn-primary w-100"><span
-                          class="glyphicon glyphicon-shopping-cart"></span>
-                        Add To Cart
-                      </a>
-                      <button type="button" class="btn btn-primary w-100" data-toggle="modal"
-                        :data-target="'#product_view'+item.id"><i class="fa fa-search"></i> Quick View</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-
-
-              <div class="modal fade product_view" :id="'product_view'+item.id">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <a href="" data-dismiss="modal" class="class pull-right"><span
-                          class="glyphicon glyphicon-remove"></span></a>
-                      <h3 class="modal-title">{ item.title }</h3>
-                    </div>
-                    <div class="modal-body">
-                      <div class="row">
-                        <div class="col-md-6 product_img">
-                          <img :src="item.image" class="img-responsive">
-                        </div>
-                        <div class="col-md-6 product_content">
-
-                          <div class="rating">
-                            <span class="glyphicon glyphicon-star"></span>
-                            <span class="glyphicon glyphicon-star"></span>
-                            <span class="glyphicon glyphicon-star"></span>
-                            <span class="glyphicon glyphicon-star"></span>
-                            <span class="glyphicon glyphicon-star"></span>
-                            (146 reviews)
-                          </div>
-                          <p>{ item.description }</p>
-
-                          <h3 class="cost"><span class="glyphicon glyphicon-usd"></span> {item.price} <small
-                              class="pre-cost"><span class="glyphicon glyphicon-usd"></span>
-                              {item.discount_price}</small>
-                          </h3>
-
-                          <div class="space-ten"></div>
-                          <div class="btn-ground">
-
-                            <a @click="addCart(item.slug)" class="btn btn-primary w-100"><span
-                                class="glyphicon glyphicon-shopping-cart"></span>
-                              Add To Cart
-                            </a>
-                            <a @click="removeFromCart(item.slug)" class="btn btn-primary w-100"><span
-                                class="glyphicon glyphicon-shopping-cart"></span>
-                              Remove from cart
-                            </a>
-
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
+
       </div>
+
+
     </div>
   </div>
+
+
 </div>
 
 
