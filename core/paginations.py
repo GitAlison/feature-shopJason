@@ -2,8 +2,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import  Response
 
 class ProductsPagination(PageNumberPagination):
-    page_size = 6
-    max_page_size = 6
+    page_size = 12
+    max_page_size = 12
 
     def get_paginated_response(self, data):
         return Response({
